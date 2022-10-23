@@ -69,7 +69,13 @@ Utils = {
         end,
         ["RandomStr"] = function(number)
             return QBCore.Shared.RandomStr(number)
-        end
+        end,
+        ["IsMod"] = function(player)
+            return QBCore.Functions.HasPermission(player.PlayerData.source, "mod")
+        end,
+        ["IsAdmin"] = function(player)
+            return QBCore.Functions.HasPermission(player.PlayerData.source, "admin")
+        end,
     },
     ["esx"] = {
         ["Framework"] = Framework,
@@ -109,7 +115,13 @@ Utils = {
         end,
         ["RandomStr"] = function(number)
             return GetRandomLetter(number)
-        end
+        end,
+        ["IsMod"] = function(player)
+            return player.getGroup() == "admin" or player.getGroup() == "mod"
+        end,
+        ["IsAdmin"] = function(player)
+            return player.getGroup() == "admin"
+        end,
     },
 }
 
