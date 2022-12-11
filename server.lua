@@ -74,9 +74,17 @@ Utils = {
             return QBCore.Functions.HasPermission(player.PlayerData.source, "mod")
         end,
         ["IsAdmin"] = function(player)
-            return QBCore.Functions.HasPermission(player.PlayerData.source, "admin")
+            return QBCore.Functions.HasPermission(player.PlayerData.source, {"admin","god"})
         end,
-    },
+        ["GetItemCount"] = function(source, itemName)
+            local item = exports["qb-inventory"]:GetItemByName(source, itemName)
+            return item ~= nil and item.amount or 0
+        end,
+        ["HasMoney"] = function(player, account, amount)
+            local money = player.Functions.GetMoney(account)
+            return money >= amount
+        end
+    },  
     ["esx"] = {
         ["Framework"] = Framework,
         ["GetPlayer"] = function(src)
@@ -122,6 +130,15 @@ Utils = {
         ["IsAdmin"] = function(player)
             return player.getGroup() == "admin"
         end,
+        ["GetItemCount"] = function(source, itemName)
+            local player = ESX.GetPlayerFromId(source)
+            local item = player.getInventoryItem(itemName)
+            return item ~= nil and item.count or 0
+        end,
+        ["HasMoney"] = function(player, account, amount)
+            local money = player.getAccount(account).money
+            return money >= amount
+        end
     },
 }
 
