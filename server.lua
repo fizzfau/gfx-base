@@ -4,6 +4,10 @@ else
     ESX = exports['es_extended']:getSharedObject()
 end
 
+if GFXInventory then
+    Inventory = exports["gfx-inventory"]
+end
+
 local NumberCharset = {}
 local Charset = {}
 
@@ -30,7 +34,6 @@ function GetRandomLetter(length)
 	end
 end
 
-
 Utils = {
     ["qb"] = {
         ["Framework"] = Framework,
@@ -46,6 +49,10 @@ Utils = {
         ["RemoveMoney"] = function(player, account, money)
             return player.Functions.RemoveMoney(account, money)
         end,
+        ["HasMoney"] = function(player, account, amount)
+            local pMoney = player.PlayerData.money[account]
+            return pMoney >= amount
+        end,
         ["Notify"] = function(src, text)
             return QBCore.Functions.Notify(src, text)
         end,
@@ -58,11 +65,42 @@ Utils = {
         ["GetJob"] = function(player)
             return player.PlayerData.job.name
         end,
+        ["GetItem"] = function(player, item)
+            local itemData
+            if GFXInventory then
+                itemData = Inventory.GetItemByName(player.PlayerData.source, player.PlayerData.source, "inventory", item)
+            else
+                itemData = exports["qb-inventory"]:GetItemByName(player.PlayerData.source, item)
+            end
+            return itemData
+        end,
+        ["GetItemCount"] = function(player, item)
+            local itemData
+            if GFXInventory then
+                itemData = Inventory.GetItemByName(player.PlayerData.source, player.PlayerData.source, "inventory", item)
+            else
+                itemData = exports["qb-inventory"]:GetItemByName(player.PlayerData.source, item)
+            end
+            itemData.amount = itemData.amount ~= nil and itemData.amount or itemData.count
+            return itemData ~= nil and itemData.amount or 0
+        end,
+        ["GetInventory"] = function(player)
+            return GFXInventory and Inventory.GetInventory(player.PlayerData.source, player.PlayerData.source) or player.PlayerData.items
+        end,
         ["AddItem"] = function(player, item, count)
-            player.Functions.AddItem(item, count)
+            if not GFXInventory then
+                player.Functions.AddItem(item, count)
+            else
+                local src = player.PlayerData.source
+                Inventory.AddItem(src, src, "inventory", item, count)
+            end
         end,
         ["RemoveItem"] = function(player, item, count)
-            player.Functions.RemoveItem(item, count)
+            if not GFXInventory then
+                player.Functions.RemoveItem(item, count)
+            else
+                Inventory.RemoveItem(player.PlayerData.source, player.PlayerData.source, "inventory", item, count)
+            end
         end,
         ["RandomInt"] = function(number)
             return QBCore.Shared.RandomInt(number)
@@ -76,15 +114,7 @@ Utils = {
         ["IsAdmin"] = function(player)
             return QBCore.Functions.HasPermission(player.PlayerData.source, {"admin","god"})
         end,
-        ["GetItemCount"] = function(source, itemName)
-            local item = exports["qb-inventory"]:GetItemByName(source, itemName)
-            return item ~= nil and item.amount or 0
-        end,
-        ["HasMoney"] = function(player, account, amount)
-            local money = player.Functions.GetMoney(account)
-            return money >= amount
-        end
-    },  
+    },
     ["esx"] = {
         ["Framework"] = Framework,
         ["GetPlayer"] = function(src)
@@ -94,9 +124,16 @@ Utils = {
             return ESX.GetPlayerFromIdentifier(index)
         end,
         ["AddMoney"] = function(player, account, money)
+            account = account == "cash" and "money" or account
             return player.addAccountMoney(account, money)
         end,
+        ["HasMoney"] = function(player, account, amount)
+            account = account == "cash" and "money" or account
+            local pMoney = player.getAccount(account).money
+            return pMoney >= amount
+        end,
         ["RemoveMoney"] = function(player, account, money)
+            account = account == "cash" and "money" or account
             return player.removeAccountMoney(account, money)
         end,
         ["Notify"] = function(src, text)
@@ -112,11 +149,29 @@ Utils = {
         ["GetJob"] = function(player)
             return player.job.name
         end,
+        ["GetItem"] = function(player, item)
+            return GFXInventory and Inventory.GetItemByName(player.source, player.source, "inventory", item) or player.getInventoryItem(item)
+        end,
+        ["GetItemCount"] = function(player, item)
+            local itemData = GFXInventory and Inventory.GetItemByName(player.source, player.source, "inventory", item) or player.getInventoryItem(item)
+            return itemData ~= nil and itemData.count or 0
+        end,
+        ["GetInventory"] = function(player)
+            return GFXInventory and Inventory.GetInventory(player.source, player.source) or player.inventory
+        end,
         ["AddItem"] = function(player, item, count)
-            player.addInventoryItem(item, count)
+            if not GFXInventory then
+                player.addInventoryItem(item, count)
+            else
+                Inventory.AddItem(player.source,player.source, "inventory", item, count)
+            end
         end,
         ["RemoveItem"] = function(player, item, count)
-            player.addInventoryItem(item, count)
+            if not GFXInventory then
+                player.removeInventoryItem(item, count)
+            else
+                Inventory.RemoveItem(player.source,player.source, "inventory", item, count)
+            end
         end,
         ["RandomInt"] = function(number)
             return GetRandomNumber(number)
@@ -130,15 +185,6 @@ Utils = {
         ["IsAdmin"] = function(player)
             return player.getGroup() == "admin"
         end,
-        ["GetItemCount"] = function(source, itemName)
-            local player = ESX.GetPlayerFromId(source)
-            local item = player.getInventoryItem(itemName)
-            return item ~= nil and item.count or 0
-        end,
-        ["HasMoney"] = function(player, account, amount)
-            local money = player.getAccount(account).money
-            return money >= amount
-        end
     },
 }
 
