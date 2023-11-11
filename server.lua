@@ -68,7 +68,7 @@ Utils = {
         ["GetItem"] = function(player, item)
             local itemData
             if GFXInventory then
-                itemData = Inventory:GetItemByName(player.PlayerData.source, player.PlayerData.source, "inventory", item)
+                itemData = Inventory:GetItemByName(player.PlayerData.source, "inventory", item)
             else
                 itemData = exports["qb-inventory"]:GetItemByName(player.PlayerData.source, item)
             end
@@ -77,7 +77,7 @@ Utils = {
         ["GetItemCount"] = function(player, item)
             local itemData
             if GFXInventory then
-                itemData = Inventory:GetItemByName(player.PlayerData.source, player.PlayerData.source, "inventory", item)
+                itemData = Inventory:GetItemByName(player.PlayerData.source, "inventory", item)
             else
                 itemData = exports["qb-inventory"]:GetItemByName(player.PlayerData.source, item)
             end
@@ -85,7 +85,7 @@ Utils = {
             return itemData ~= nil and itemData.amount or 0
         end,
         ["GetInventory"] = function(player)
-            return GFXInventory and Inventory:GetInventory(player.PlayerData.source, player.PlayerData.source) or player.PlayerData.items
+            return GFXInventory and Inventory:GetInventory(player.PlayerData.source) or player.PlayerData.items
         end,
         ["AddItem"] = function(player, item, count)
             if not GFXInventory then
@@ -99,7 +99,7 @@ Utils = {
             if not GFXInventory then
                 player.Functions.RemoveItem(item, count)
             else
-                Inventory:RemoveItem(player.PlayerData.source, player.PlayerData.source, "inventory", item, count)
+                Inventory:RemoveItem(player.PlayerData.source, "inventory", item, count)
             end
         end,
         ["RandomInt"] = function(number)
@@ -150,27 +150,27 @@ Utils = {
             return player.job.name
         end,
         ["GetItem"] = function(player, item)
-            return GFXInventory and Inventory:GetItemByName(player.source, player.source, "inventory", item) or player.getInventoryItem(item)
+            return GFXInventory and Inventory:GetItemByName(player.source, "inventory", item) or player.getInventoryItem(item)
         end,
         ["GetItemCount"] = function(player, item)
-            local itemData = GFXInventory and Inventory:GetItemByName(player.source, player.source, "inventory", item) or player.getInventoryItem(item)
+            local itemData = GFXInventory and Inventory:GetItemByName(player.source, "inventory", item) or player.getInventoryItem(item)
             return itemData ~= nil and itemData.count or 0
         end,
         ["GetInventory"] = function(player)
-            return GFXInventory and Inventory:GetInventory(player.source, player.source) or player.inventory
+            return GFXInventory and Inventory:GetInventory(player.source) or player.inventory
         end,
         ["AddItem"] = function(player, item, count)
             if not GFXInventory then
                 player.addInventoryItem(item, count)
             else
-                Inventory:AddItem(player.source,player.source, "inventory", item, count)
+                Inventory:AddItem(player.source, "inventory", item, count)
             end
         end,
         ["RemoveItem"] = function(player, item, count)
             if not GFXInventory then
                 player.removeInventoryItem(item, count)
             else
-                Inventory:RemoveItem(player.source,player.source, "inventory", item, count)
+                Inventory:RemoveItem(player.source, "inventory", item, count)
             end
         end,
         ["RandomInt"] = function(number)
